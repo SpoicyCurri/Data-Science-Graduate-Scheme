@@ -1,11 +1,19 @@
 ---
-title: "Does rurality have an impact of Coronavirus?"
+title: "Does rurality have an impact on the spread of Coronavirus?"
 output: html_notebook
 ---
 
 ```{r}
 library(tidyverse)
 library(readxl)
+
+# Working with Spatial Data
+library(sf)
+library(rmapshaper)
+
+# Embedding HTML Widgets
+library(htmltools)
+library(leaflet)
 
 ```
 
@@ -89,6 +97,8 @@ utla_data <- mid_year_population_2020 %>%
   group_by(areaCode, areaName, Geography, detailedRuralClassification, broadRuralClassification) %>%
   summarise(populationMid2020 = sum(populationMid2020)) %>%
   ungroup()
+
+glimpse(utla_data)
   
 ```
 
@@ -100,7 +110,7 @@ I have imported the rural urban classification for upper tier local authorities,
 
 detailed_ruc_order <- c("Mainly Rural", "Largely Rural", "Urban with Significant Rural", "Urban with City and Town", "Urban with Minor Conurbation", "Urban with Major Conurbation")
 
-Eng_daily_covid19_indicators %>%
+overall_data <- Eng_daily_covid19_indicators %>%
   left_join(utla_data) %>%
   group_by(detailedRuralClassification) %>%
   summarise(TotalCases = sum(newCasesByPublishDate),
@@ -112,8 +122,110 @@ Eng_daily_covid19_indicators %>%
               group_by(detailedRuralClassification) %>%
               summarise(pop2020 = sum(populationMid2020),
                         nLADcheck = n_distinct(areaCode))) %>%
-  mutate()
+  ungroup() %>%
+  mutate(OverallCaseRate = TotalCases/pop2020*100000,
+         OverallDeathRate = TotalDeaths/pop2020*100000)
   
+# overall_data %>%
+#   ggplot(aes(OverallCaseRate, detailedRuralClassification)) +
+#   geom_col() 
 
+```
+
+A clear pattern in the overall rates of covid cases when each local authority is aggregated by rural classification. 
+
+The overall case rate for the most rural areas is `r round(overall_data$OverallCaseRate[1],0)` cases per 100,000 population, while the overall case rate for the most urban areas is `r round(overall_data$OverallCaseRate[6],0)` cases per 100,000 population. 
+
+The covid rate of the most urban areas is `r round(overall_data$OverallCaseRate[6]/overall_data$OverallCaseRate[1],1)` times the covid rate in the most rural areas.
+
+However, the overall death rate had less clear pattern. The most rural areas had the a rate of `r round(overall_data$OverallDeathRate[1],0)` deaths registered per 100,000 population, while the overall death rate for the most urban areas had the 3rd highest death rate of `r round(overall_data$OverallDeathRate[6],0)` deaths registered per 100,000 population. The highest death rate came from Urban areas with Minor Conurbations with a death rate of `r round(overall_data$OverallDeathRate[5],0)` deaths registered per 100,000 population.
+
+```{r mapping}
+
+UTLA_shp <- st_read("spatial data/COunties_and_Unitary_Authorities_(December_2019)_Boundaries_UK_BFC.shp") %>%
+  rmapshaper::ms_simplify()
+
+UTLA_cases_deaths <- Eng_daily_covid19_indicators %>%
+  group_by(areaCode, areaName) %>%
+  summarise(TotalCases = sum(newCasesByPublishDate),
+            TotalDeaths = sum(newOnsDeathsByRegistrationDate),
+            nLAD = n_distinct(areaCode)) %>%
+  left_join(utla_data) %>%
+  ungroup() %>%
+  mutate(OverallCaseRate = TotalCases/populationMid2020*100000,
+         OverallDeathRate = TotalDeaths/populationMid2020*100000)
+
+UTLA_ruc_shp <- left_join(UTLA_shp, UTLA_cases_deaths, by = c("ctyua19cd" = "areaCode")) %>%
+  st_transform(4326) %>% # Convert from a UK Projection (epsg = 27700) to a Global Projection (epsg = 4326)
+  mutate(OverallCaseRate_comma = scales::comma(OverallCaseRate, accuracy = 1),
+         OverallDeathRate_comma = scales::comma(OverallDeathRate, accuracy = 1))
+  # select(lad11cd, lad11nm, ruc11, broad_ruc11, st_areasha)
+```
+
+
+```{r}
+bins <- c(0, 1000, 2000, 4000, 6000, 8000, 10000, Inf)
+pal <- colorBin("YlOrRd", domain = UTLA_ruc_shp$OverallCaseRate, bins = bins)
+
+labels <- sprintf(
+  "<strong>%s</strong><br/>%s<strong><br/>%s",
+  UTLA_ruc_shp$areaName, UTLA_ruc_shp$OverallCaseRate_comma, UTLA_ruc_shp$detailedRuralClassification
+) %>% lapply(htmltools::HTML)
+
+UTLA_ruc_shp %>%
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(
+    stroke = T, 
+    smoothFactor = 1, 
+    fillOpacity = 0.7,
+    fillColor = ~pal(OverallCaseRate),
+    color = "white",
+    weight = 2,
+    dashArray = "1",
+    highlight = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+  label = labels,
+  labelOptions = labelOptions(
+    style = list("font-weight" = "normal", padding = "3px 8px"),
+    textsize = "15px",
+    direction = "auto"))
+```
+
+```{r}
+bins <- c(0, 50, 100, 150, 200, 250, 300, Inf)
+pal <- colorBin("YlOrRd", domain = UTLA_ruc_shp$OverallDeathRate, bins = bins)
+
+labels <- sprintf(
+  "<strong>%s</strong><br/>%s<strong><br/>%s",
+  UTLA_ruc_shp$areaName, UTLA_ruc_shp$OverallDeathRate_comma, UTLA_ruc_shp$detailedRuralClassification
+) %>% lapply(htmltools::HTML)
+
+UTLA_ruc_shp %>%
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(
+    stroke = T, 
+    smoothFactor = 1, 
+    fillOpacity = 0.7,
+    fillColor = ~pal(OverallDeathRate),
+    color = "white",
+    weight = 2,
+    dashArray = "1",
+    highlight = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+  label = labels,
+  labelOptions = labelOptions(
+    style = list("font-weight" = "normal", padding = "3px 8px"),
+    textsize = "15px",
+    direction = "auto"))
 ```
 

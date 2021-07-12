@@ -5,6 +5,7 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
+library(readxl)
 
 ```
 
@@ -23,6 +24,19 @@ glimpse(uk_daily_covid19_cases)
 
 glimpse(uk_daily_covid19_deaths)
 
+uk_daily_covid19_deaths %>%
+  select(areaCode) %>%
+  unique() %>%
+  filter(str_detect(areaCode, "^E")) %>%
+  nrow()
+
+Eng_daily_covid19_indicators <- uk_daily_covid19_cases %>%
+  full_join(uk_daily_covid19_deaths) %>% 
+  filter(str_detect(areaCode, "^E")) %>%
+  replace_na(list(newOnsDeathsByRegistrationDate = 0,
+                  newCasesByPublishDate = 0))
+  
+
 ```
 
 ### Daily Cases
@@ -31,9 +45,9 @@ Data has `r nrow(uk_daily_covid19_cases)` rows and `r ncol(uk_daily_covid19_case
 
 Dates: `r min(uk_daily_covid19_cases$date)` to `r max(uk_daily_covid19_cases$date)`.
 
-It assigns covid cases by the date the data was published on, not when the initial test was taken.
+It assigns covid cases by the date the data was first included in published totals, not when the initial test was taken.
 
-The data is at Upper Tier Local Authority level.
+The data is at Upper Tier Local Authority level, of which 149 are in England.
 
 ### Daily Deaths
 
@@ -43,11 +57,63 @@ Dates: `r min(uk_daily_covid19_deaths$date)` to `r max(uk_daily_covid19_deaths$d
 
 It assigns deaths to covid if COVID-19 is mentioned as a cause on the death certificate, while the date refers to the date the death was registered.
 
-The data is at Upper Tier Local Authority level.
+The data is at Upper Tier Local Authority level, of which 149 are in England.
+
+```{r Other-Datasets}
+
+mid_year_population_2020 <- read_excel("data/ukpopestimatesmid2020on2020geography.xlsx",
+                                       sheet = "MYE4",
+                                       skip = 7) %>%
+  select("areaCode" = Code, "areaName" = Name, Geography, "populationMid2020" = `Mid-2020`) %>%
+  filter(str_detect(areaCode, "^E")) %>% 
+  filter(Geography %in% c("Unitary Authority", "Metropolitan District", "County", "London Borough"))
+
+utla_rural_classification <- read_excel("data/utla_ruc.xlsx",
+                                       skip = 2) %>%
+  rename("areaCode" = `UTLA19 CD`,
+         "areaName" = `UTLA19 NM`,
+         "detailedRuralClassification" = RUC11,
+         "broadRuralClassification" = `Broad RUC11`)
+
+utla_data <- mid_year_population_2020 %>%
+  left_join(utla_rural_classification) %>%
+  replace_na(list(detailedRuralClassification = "Urban with Significant Rural",
+                  broadRuralClassification = "Urban with Significant Rural")) %>%
+  mutate(areaName = str_replace(areaName, "City of London", "Hackney and City of London") %>%
+           str_replace(., "Hackney$", "Hackney and City of London") %>%
+           str_replace(., "Isles of Scilly", "Cornwall and Isles of Scilly") %>%
+           str_replace(., "Cornwall$", "Cornwall and Isles of Scilly"),
+         areaCode = str_replace(areaCode, "E09000001", "E09000012"),
+         areaCode = str_replace(areaCode, "E06000053", "E06000052"),
+         areaCode = str_replace(areaCode, "E06000060", "E10000002")) %>%
+  group_by(areaCode, areaName, Geography, detailedRuralClassification, broadRuralClassification) %>%
+  summarise(populationMid2020 = sum(populationMid2020)) %>%
+  ungroup()
+  
+```
+
+In order to compare the data between local authorities, we must normalise the data for population level, as a local authority with a higher population would naturally accumulate more covid cases and deaths, ceterus-paribus.
+
+I have imported the rural urban classification for upper tier local authorities, which is constructed using the same method as the local authority district rural urban classification. Areas with a rural population over 50% are classified as predominantly rural, and areas with a rural population below 25% are classified as predominantly urban.
 
 ```{r}
 
+detailed_ruc_order <- c("Mainly Rural", "Largely Rural", "Urban with Significant Rural", "Urban with City and Town", "Urban with Minor Conurbation", "Urban with Major Conurbation")
 
+Eng_daily_covid19_indicators %>%
+  left_join(utla_data) %>%
+  group_by(detailedRuralClassification) %>%
+  summarise(TotalCases = sum(newCasesByPublishDate),
+            TotalDeaths = sum(newOnsDeathsByRegistrationDate),
+            nLAD = n_distinct(areaCode)) %>%
+  mutate(detailedRuralClassification = factor(detailedRuralClassification, detailed_ruc_order)) %>%
+  arrange(detailedRuralClassification) %>%
+  left_join(utla_data %>% 
+              group_by(detailedRuralClassification) %>%
+              summarise(pop2020 = sum(populationMid2020),
+                        nLADcheck = n_distinct(areaCode))) %>%
+  mutate()
+  
 
 ```
 

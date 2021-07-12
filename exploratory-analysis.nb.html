@@ -1760,35 +1760,93 @@ uk_daily_covid19_deaths &lt;- read_csv(&quot;https://api.coronavirus.data.gov.uk
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2xpbXBzZSh1a19kYWlseV9jb3ZpZDE5X2Nhc2VzKVxuXG5nbGltcHNlKHVrX2RhaWx5X2NvdmlkMTlfZGVhdGhzKVxuXG5gYGAifQ== -->
-<pre class="r"><code>glimpse(uk_daily_covid19_cases)
-
-glimpse(uk_daily_covid19_deaths)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuRW5nX2RhaWx5X2NvdmlkMTlfaW5kaWNhdG9ycyA8LSB1a19kYWlseV9jb3ZpZDE5X2Nhc2VzICU+JVxuICBmdWxsX2pvaW4odWtfZGFpbHlfY292aWQxOV9kZWF0aHMpICU+JSBcbiAgZmlsdGVyKHN0cl9kZXRlY3QoYXJlYUNvZGUsIFwiXkVcIikpICU+JVxuICByZXBsYWNlX25hKGxpc3QobmV3T25zRGVhdGhzQnlSZWdpc3RyYXRpb25EYXRlID0gMCxcbiAgICAgICAgICAgICAgICAgIG5ld0Nhc2VzQnlQdWJsaXNoRGF0ZSA9IDApKVxuXG5gYGAifQ== -->
+<pre class="r"><code>Eng_daily_covid19_indicators &lt;- uk_daily_covid19_cases %&gt;%
+  full_join(uk_daily_covid19_deaths) %&gt;% 
+  filter(str_detect(areaCode, &quot;^E&quot;)) %&gt;%
+  replace_na(list(newOnsDeathsByRegistrationDate = 0,
+                  newCasesByPublishDate = 0))
 </code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiSm9pbmluZywgYnkgPSBjKFwiYXJlYUNvZGVcIiwgXCJhcmVhTmFtZVwiLCBcImFyZWFUeXBlXCIsIFwiZGF0ZVwiKVxuIn0= -->
+<pre><code>Joining, by = c(&quot;areaCode&quot;, &quot;areaName&quot;, &quot;areaType&quot;, &quot;date&quot;)</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <div id="daily-cases" class="section level3">
 <h3>Daily Cases</h3>
 <p>Data has 90887 rows and 5 columns.</p>
 <p>Dates: 2020-04-17 to 2021-07-12.</p>
-<p>It assigns covid cases by the date the data was published on, not when the initial test was taken.</p>
-<p>The data is at Upper Tier Local Authority level.</p>
+<p>It assigns covid cases by the date the data was first included in published totals, not when the initial test was taken.</p>
+<p>The data is at Upper Tier Local Authority level, of which 149 are in England.</p>
 </div>
 <div id="daily-deaths" class="section level3">
 <h3>Daily Deaths</h3>
 <p>Data has 11313 rows and 5 columns.</p>
 <p>Dates: 2020-03-13 to 2021-06-25.</p>
 <p>It assigns deaths to covid if COVID-19 is mentioned as a cause on the death certificate, while the date refers to the date the death was registered.</p>
-<p>The data is at Upper Tier Local Authority level.</p>
+<p>The data is at Upper Tier Local Authority level, of which 149 are in England.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudXRsYV9kYXRhIDwtIG1pZF95ZWFyX3BvcHVsYXRpb25fMjAyMCAlPiVcbiAgbGVmdF9qb2luKHV0bGFfcnVyYWxfY2xhc3NpZmljYXRpb24pICU+JVxuICByZXBsYWNlX25hKGxpc3QoZGV0YWlsZWRSdXJhbENsYXNzaWZpY2F0aW9uID0gXCJVcmJhbiB3aXRoIFNpZ25pZmljYW50IFJ1cmFsXCIsXG4gICAgICAgICAgICAgICAgICBicm9hZFJ1cmFsQ2xhc3NpZmljYXRpb24gPSBcIlVyYmFuIHdpdGggU2lnbmlmaWNhbnQgUnVyYWxcIikpICU+JVxuICBtdXRhdGUoYXJlYU5hbWUgPSBzdHJfcmVwbGFjZShhcmVhTmFtZSwgXCJDaXR5IG9mIExvbmRvblwiLCBcIkhhY2tuZXkgYW5kIENpdHkgb2YgTG9uZG9uXCIpICU+JVxuICAgICAgICAgICBzdHJfcmVwbGFjZSguLCBcIkhhY2tuZXkkXCIsIFwiSGFja25leSBhbmQgQ2l0eSBvZiBMb25kb25cIikgJT4lXG4gICAgICAgICAgIHN0cl9yZXBsYWNlKC4sIFwiSXNsZXMgb2YgU2NpbGx5XCIsIFwiQ29ybndhbGwgYW5kIElzbGVzIG9mIFNjaWxseVwiKSAlPiVcbiAgICAgICAgICAgc3RyX3JlcGxhY2UoLiwgXCJDb3Jud2FsbCRcIiwgXCJDb3Jud2FsbCBhbmQgSXNsZXMgb2YgU2NpbGx5XCIpLFxuICAgICAgICAgYXJlYUNvZGUgPSBzdHJfcmVwbGFjZShhcmVhQ29kZSwgXCJFMDkwMDAwMDFcIiwgXCJFMDkwMDAwMTJcIiksXG4gICAgICAgICBhcmVhQ29kZSA9IHN0cl9yZXBsYWNlKGFyZWFDb2RlLCBcIkUwNjAwMDA1M1wiLCBcIkUwNjAwMDA1MlwiKSxcbiAgICAgICAgIGFyZWFDb2RlID0gc3RyX3JlcGxhY2UoYXJlYUNvZGUsIFwiRTA2MDAwMDYwXCIsIFwiRTEwMDAwMDAyXCIpKSAlPiVcbiAgZ3JvdXBfYnkoYXJlYUNvZGUsIGFyZWFOYW1lLCBHZW9ncmFwaHksIGRldGFpbGVkUnVyYWxDbGFzc2lmaWNhdGlvbiwgYnJvYWRSdXJhbENsYXNzaWZpY2F0aW9uKSAlPiVcbiAgc3VtbWFyaXNlKHBvcHVsYXRpb25NaWQyMDIwID0gc3VtKHBvcHVsYXRpb25NaWQyMDIwKSkgJT4lXG4gIHVuZ3JvdXAoKVxuXG5gYGAifQ== -->
+<pre class="r"><code>utla_data &lt;- mid_year_population_2020 %&gt;%
+  left_join(utla_rural_classification) %&gt;%
+  replace_na(list(detailedRuralClassification = &quot;Urban with Significant Rural&quot;,
+                  broadRuralClassification = &quot;Urban with Significant Rural&quot;)) %&gt;%
+  mutate(areaName = str_replace(areaName, &quot;City of London&quot;, &quot;Hackney and City of London&quot;) %&gt;%
+           str_replace(., &quot;Hackney$&quot;, &quot;Hackney and City of London&quot;) %&gt;%
+           str_replace(., &quot;Isles of Scilly&quot;, &quot;Cornwall and Isles of Scilly&quot;) %&gt;%
+           str_replace(., &quot;Cornwall$&quot;, &quot;Cornwall and Isles of Scilly&quot;),
+         areaCode = str_replace(areaCode, &quot;E09000001&quot;, &quot;E09000012&quot;),
+         areaCode = str_replace(areaCode, &quot;E06000053&quot;, &quot;E06000052&quot;),
+         areaCode = str_replace(areaCode, &quot;E06000060&quot;, &quot;E10000002&quot;)) %&gt;%
+  group_by(areaCode, areaName, Geography, detailedRuralClassification, broadRuralClassification) %&gt;%
+  summarise(populationMid2020 = sum(populationMid2020)) %&gt;%
+  ungroup()
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiSm9pbmluZywgYnkgPSBjKFwiYXJlYUNvZGVcIiwgXCJhcmVhTmFtZVwiKVxuYHN1bW1hcmlzZSgpYCBoYXMgZ3JvdXBlZCBvdXRwdXQgYnkgJ2FyZWFDb2RlJywgJ2FyZWFOYW1lJywgJ0dlb2dyYXBoeScsICdkZXRhaWxlZFJ1cmFsQ2xhc3NpZmljYXRpb24nLiBZb3UgY2FuIG92ZXJyaWRlIHVzaW5nIHRoZSBgLmdyb3Vwc2AgYXJndW1lbnQuXG4ifQ== -->
+<pre><code>Joining, by = c(&quot;areaCode&quot;, &quot;areaName&quot;)
+`summarise()` has grouped output by &#39;areaCode&#39;, &#39;areaName&#39;, &#39;Geography&#39;, &#39;detailedRuralClassification&#39;. You can override using the `.groups` argument.</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>In order to compare the data between local authorities, we must normalise the data for population level, as a local authority with a higher population would naturally accumulate more covid cases and deaths, ceterus-paribus.</p>
+<p>I have imported the rural urban classification for upper tier local authorities, which is constructed using the same method as the local authority district rural urban classification. Areas with a rural population over 50% are classified as predominantly rural, and areas with a rural population below 25% are classified as predominantly urban.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuRW5nX2RhaWx5X2NvdmlkMTlfaW5kaWNhdG9ycyAlPiVcbiAgbGVmdF9qb2luKHV0bGFfZGF0YSkgJT4lXG4gIGdyb3VwX2J5KGRldGFpbGVkUnVyYWxDbGFzc2lmaWNhdGlvbikgJT4lXG4gIHN1bW1hcmlzZShUb3RhbENhc2VzID0gc3VtKG5ld0Nhc2VzQnlQdWJsaXNoRGF0ZSksXG4gICAgICAgICAgICBUb3RhbERlYXRocyA9IHN1bShuZXdPbnNEZWF0aHNCeVJlZ2lzdHJhdGlvbkRhdGUpLFxuICAgICAgICAgICAgbkxBRCA9IG5fZGlzdGluY3QoYXJlYUNvZGUpKSAlPiVcbiAgbXV0YXRlKGRldGFpbGVkUnVyYWxDbGFzc2lmaWNhdGlvbiA9IGZhY3RvcihkZXRhaWxlZFJ1cmFsQ2xhc3NpZmljYXRpb24sIGRldGFpbGVkX3J1Y19vcmRlcikpICU+JVxuICBhcnJhbmdlKGRldGFpbGVkUnVyYWxDbGFzc2lmaWNhdGlvbikgJT4lXG4gIGxlZnRfam9pbih1dGxhX2RhdGEgJT4lIFxuICAgICAgICAgICAgICBncm91cF9ieShkZXRhaWxlZFJ1cmFsQ2xhc3NpZmljYXRpb24pICU+JVxuICAgICAgICAgICAgICBzdW1tYXJpc2UocG9wMjAyMCA9IHN1bShwb3B1bGF0aW9uTWlkMjAyMCksXG4gICAgICAgICAgICAgICAgICAgICAgICBuTEFEY2hlY2sgPSBuX2Rpc3RpbmN0KGFyZWFDb2RlKSkpXG5cbmBgYCJ9 -->
+<pre class="r"><code>Eng_daily_covid19_indicators %&gt;%
+  left_join(utla_data) %&gt;%
+  group_by(detailedRuralClassification) %&gt;%
+  summarise(TotalCases = sum(newCasesByPublishDate),
+            TotalDeaths = sum(newOnsDeathsByRegistrationDate),
+            nLAD = n_distinct(areaCode)) %&gt;%
+  mutate(detailedRuralClassification = factor(detailedRuralClassification, detailed_ruc_order)) %&gt;%
+  arrange(detailedRuralClassification) %&gt;%
+  left_join(utla_data %&gt;% 
+              group_by(detailedRuralClassification) %&gt;%
+              summarise(pop2020 = sum(populationMid2020),
+                        nLADcheck = n_distinct(areaCode)))
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiSm9pbmluZywgYnkgPSBjKFwiYXJlYUNvZGVcIiwgXCJhcmVhTmFtZVwiKVxuSm9pbmluZywgYnkgPSBcImRldGFpbGVkUnVyYWxDbGFzc2lmaWNhdGlvblwiXG4ifQ== -->
+<pre><code>Joining, by = c(&quot;areaCode&quot;, &quot;areaName&quot;)
+Joining, by = &quot;detailedRuralClassification&quot;</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6Nn0sInJkZiI6Ikg0c0lBQUFBQUFBQUJvMVNPMHNEUVJEZXkwTk5mT0FEUVZEaENzVkNESG9paUNBa0pKVW9pQTlJWWVGNnR5YWJuTHZoYmtPMFVLenNCSCtMdFlWL1FVRVJiT3kwdExZd3p1N3RhandzSkV5K25XOGUrODNzYlpYS2k5bHlGaUdVUkNuNEpkTndSRjNGelFWbnlVRW9sUURQQWo0ajhSaXlSbVFZYkZCaEZPamJ3SlQ1Si9aV004Qys1dnJYY1ZBaE1YSmlOempBekc1UlViVzNhWVhSUStwaUpuN2xqSFhrRktrNHNUSHo3QjNlWW4vMDJLQ01CM2FSc3lad2d2SS9jM0F0bG9QUWdCU2ZmN1p1NWJDRnliVjNoYk43VG9RUGF3cVR0V1dGcThPSy82NjczRlJPL3U0MHIvQ2xKL0tmSGlQL1d2dXZiN2F1NjlkTFM0SU5nWTJDellESlplZE4zOExNVkhRL3ZsaVZoUVU2ZmJZdmtWemR2MGhjdVNtcmVGaTM5di9WOTlmcnBSaytJbUhzNWNZOUlqRDFpYWRlb09qak1GUnYwckhMN0E0WEVNSWhGRWRNcjJKS0JJdXFvVkpzdlZEUzUrNEdiemp6enJ4Mk16TGtWb2xianduS0JMeVZNNkxrSklseitHdTMyeDl4NWE3VXBaVWJNdXRoZ1hPSEFkU0Q5eGtyNmVZTk9RSVVKVWIwUGpxTHJTQkdERGFaVk9MTnVkVW1xODg1Qy9JR0ZmOVp0S1dYM1hHV2R5YmF1bGRhOStvaXJFSVpNZUo5ZkVETXR6MEFJNnVKYzQyQU1tRkdBVGJNQ2JsVXc3amNONHdhRG4xK0FTZHRvdUNwQXdBQSJ9 -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["detailedRuralClassification"],"name":[1],"type":["chr"],"align":["left"]},{"label":["TotalCases"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["TotalDeaths"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["nLAD"],"name":[4],"type":["int"],"align":["right"]},{"label":["pop2020"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["nLADcheck"],"name":[6],"type":["int"],"align":["right"]}],"data":[{"1":"Mainly Rural","2":"27655","3":"938","4":"3","5":"758297","6":"3"},{"1":"Largely Rural","2":"479932","3":"17909","4":"17","5":"9187817","6":"17"},{"1":"Urban with Significant Rural","2":"896537","3":"32832","4":"21","5":"13183987","6":"21"},{"1":"Urban with City and Town","2":"912037","3":"25433","4":"39","5":"11306647","6":"39"},{"1":"Urban with Minor Conurbation","2":"159047","3":"4616","4":"5","5":"1752152","6":"5"},{"1":"Urban with Major Conurbation","2":"1905202","3":"48961","4":"64","5":"20361238","6":"64"}],"options":{"columns":{"min":{},"max":[10],"total":[6]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIkRvZXMgcnVyYWxpdHkgaGF2ZSBhbiBpbXBhY3Qgb2YgQ29yb25hdmlydXM/Ig0Kb3V0cHV0OiBodG1sX25vdGVib29rDQotLS0NCg0KYGBge3J9DQpsaWJyYXJ5KHRpZHl2ZXJzZSkNCg0KYGBgDQoNCkltcG9ydCBkYWlseSBjb3ZpZCBjYXNlcyBhbmQgZGVhdGhzIGZvciB0aGUgVUsgZnJvbSB0aGUgUHVibGljIEhlYWx0aCBFbmdsYW5kIGNvcm9uYXZpcnVzIGRhdGEgYXBpLg0KDQpgYGB7cn0NCg0KdWtfZGFpbHlfY292aWQxOV9jYXNlcyA8LSByZWFkX2NzdigiaHR0cHM6Ly9hcGkuY29yb25hdmlydXMuZGF0YS5nb3YudWsvdjIvZGF0YT9hcmVhVHlwZT11dGxhJm1ldHJpYz1uZXdDYXNlc0J5UHVibGlzaERhdGUmZm9ybWF0PWNzdiIpDQoNCnVrX2RhaWx5X2NvdmlkMTlfZGVhdGhzIDwtIHJlYWRfY3N2KCJodHRwczovL2FwaS5jb3JvbmF2aXJ1cy5kYXRhLmdvdi51ay92Mi9kYXRhP2FyZWFUeXBlPXV0bGEmbWV0cmljPW5ld09uc0RlYXRoc0J5UmVnaXN0cmF0aW9uRGF0ZSZmb3JtYXQ9Y3N2IikNCg0KYGBgDQoNCmBgYHtyfQ0KZ2xpbXBzZSh1a19kYWlseV9jb3ZpZDE5X2Nhc2VzKQ0KDQpnbGltcHNlKHVrX2RhaWx5X2NvdmlkMTlfZGVhdGhzKQ0KDQpgYGANCg0KIyMjIERhaWx5IENhc2VzDQoNCkRhdGEgaGFzIGByIG5yb3codWtfZGFpbHlfY292aWQxOV9jYXNlcylgIHJvd3MgYW5kIGByIG5jb2wodWtfZGFpbHlfY292aWQxOV9jYXNlcylgIGNvbHVtbnMuDQoNCkRhdGVzOiBgciBtaW4odWtfZGFpbHlfY292aWQxOV9jYXNlcyRkYXRlKWAgdG8gYHIgbWF4KHVrX2RhaWx5X2NvdmlkMTlfY2FzZXMkZGF0ZSlgLg0KDQpJdCBhc3NpZ25zIGNvdmlkIGNhc2VzIGJ5IHRoZSBkYXRlIHRoZSBkYXRhIHdhcyBwdWJsaXNoZWQgb24sIG5vdCB3aGVuIHRoZSBpbml0aWFsIHRlc3Qgd2FzIHRha2VuLg0KDQpUaGUgZGF0YSBpcyBhdCBVcHBlciBUaWVyIExvY2FsIEF1dGhvcml0eSBsZXZlbC4NCg0KIyMjIERhaWx5IERlYXRocw0KDQpEYXRhIGhhcyBgciBucm93KHVrX2RhaWx5X2NvdmlkMTlfZGVhdGhzKWAgcm93cyBhbmQgYHIgbmNvbCh1a19kYWlseV9jb3ZpZDE5X2RlYXRocylgIGNvbHVtbnMuDQoNCkRhdGVzOiBgciBtaW4odWtfZGFpbHlfY292aWQxOV9kZWF0aHMkZGF0ZSlgIHRvIGByIG1heCh1a19kYWlseV9jb3ZpZDE5X2RlYXRocyRkYXRlKWAuDQoNCkl0IGFzc2lnbnMgZGVhdGhzIHRvIGNvdmlkIGlmIENPVklELTE5IGlzIG1lbnRpb25lZCBhcyBhIGNhdXNlIG9uIHRoZSBkZWF0aCBjZXJ0aWZpY2F0ZSwgd2hpbGUgdGhlIGRhdGUgcmVmZXJzIHRvIHRoZSBkYXRlIHRoZSBkZWF0aCB3YXMgcmVnaXN0ZXJlZC4NCg0KVGhlIGRhdGEgaXMgYXQgVXBwZXIgVGllciBMb2NhbCBBdXRob3JpdHkgbGV2ZWwuDQoNCmBgYHtyfQ0KDQoNCg0KYGBgDQoNCg==</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkRvZXMgcnVyYWxpdHkgaGF2ZSBhbiBpbXBhY3Qgb2YgQ29yb25hdmlydXM/Ig0Kb3V0cHV0OiBodG1sX25vdGVib29rDQotLS0NCg0KYGBge3J9DQpsaWJyYXJ5KHRpZHl2ZXJzZSkNCmxpYnJhcnkocmVhZHhsKQ0KDQpgYGANCg0KSW1wb3J0IGRhaWx5IGNvdmlkIGNhc2VzIGFuZCBkZWF0aHMgZm9yIHRoZSBVSyBmcm9tIHRoZSBQdWJsaWMgSGVhbHRoIEVuZ2xhbmQgY29yb25hdmlydXMgZGF0YSBhcGkuDQoNCmBgYHtyfQ0KDQp1a19kYWlseV9jb3ZpZDE5X2Nhc2VzIDwtIHJlYWRfY3N2KCJodHRwczovL2FwaS5jb3JvbmF2aXJ1cy5kYXRhLmdvdi51ay92Mi9kYXRhP2FyZWFUeXBlPXV0bGEmbWV0cmljPW5ld0Nhc2VzQnlQdWJsaXNoRGF0ZSZmb3JtYXQ9Y3N2IikNCg0KdWtfZGFpbHlfY292aWQxOV9kZWF0aHMgPC0gcmVhZF9jc3YoImh0dHBzOi8vYXBpLmNvcm9uYXZpcnVzLmRhdGEuZ292LnVrL3YyL2RhdGE/YXJlYVR5cGU9dXRsYSZtZXRyaWM9bmV3T25zRGVhdGhzQnlSZWdpc3RyYXRpb25EYXRlJmZvcm1hdD1jc3YiKQ0KDQpgYGANCg0KYGBge3J9DQpnbGltcHNlKHVrX2RhaWx5X2NvdmlkMTlfY2FzZXMpDQoNCmdsaW1wc2UodWtfZGFpbHlfY292aWQxOV9kZWF0aHMpDQoNCnVrX2RhaWx5X2NvdmlkMTlfZGVhdGhzICU+JQ0KICBzZWxlY3QoYXJlYUNvZGUpICU+JQ0KICB1bmlxdWUoKSAlPiUNCiAgZmlsdGVyKHN0cl9kZXRlY3QoYXJlYUNvZGUsICJeRSIpKSAlPiUNCiAgbnJvdygpDQoNCkVuZ19kYWlseV9jb3ZpZDE5X2luZGljYXRvcnMgPC0gdWtfZGFpbHlfY292aWQxOV9jYXNlcyAlPiUNCiAgZnVsbF9qb2luKHVrX2RhaWx5X2NvdmlkMTlfZGVhdGhzKSAlPiUgDQogIGZpbHRlcihzdHJfZGV0ZWN0KGFyZWFDb2RlLCAiXkUiKSkgJT4lDQogIHJlcGxhY2VfbmEobGlzdChuZXdPbnNEZWF0aHNCeVJlZ2lzdHJhdGlvbkRhdGUgPSAwLA0KICAgICAgICAgICAgICAgICAgbmV3Q2FzZXNCeVB1Ymxpc2hEYXRlID0gMCkpDQogIA0KDQpgYGANCg0KIyMjIERhaWx5IENhc2VzDQoNCkRhdGEgaGFzIGByIG5yb3codWtfZGFpbHlfY292aWQxOV9jYXNlcylgIHJvd3MgYW5kIGByIG5jb2wodWtfZGFpbHlfY292aWQxOV9jYXNlcylgIGNvbHVtbnMuDQoNCkRhdGVzOiBgciBtaW4odWtfZGFpbHlfY292aWQxOV9jYXNlcyRkYXRlKWAgdG8gYHIgbWF4KHVrX2RhaWx5X2NvdmlkMTlfY2FzZXMkZGF0ZSlgLg0KDQpJdCBhc3NpZ25zIGNvdmlkIGNhc2VzIGJ5IHRoZSBkYXRlIHRoZSBkYXRhIHdhcyBmaXJzdCBpbmNsdWRlZCBpbiBwdWJsaXNoZWQgdG90YWxzLCBub3Qgd2hlbiB0aGUgaW5pdGlhbCB0ZXN0IHdhcyB0YWtlbi4NCg0KVGhlIGRhdGEgaXMgYXQgVXBwZXIgVGllciBMb2NhbCBBdXRob3JpdHkgbGV2ZWwsIG9mIHdoaWNoIDE0OSBhcmUgaW4gRW5nbGFuZC4NCg0KIyMjIERhaWx5IERlYXRocw0KDQpEYXRhIGhhcyBgciBucm93KHVrX2RhaWx5X2NvdmlkMTlfZGVhdGhzKWAgcm93cyBhbmQgYHIgbmNvbCh1a19kYWlseV9jb3ZpZDE5X2RlYXRocylgIGNvbHVtbnMuDQoNCkRhdGVzOiBgciBtaW4odWtfZGFpbHlfY292aWQxOV9kZWF0aHMkZGF0ZSlgIHRvIGByIG1heCh1a19kYWlseV9jb3ZpZDE5X2RlYXRocyRkYXRlKWAuDQoNCkl0IGFzc2lnbnMgZGVhdGhzIHRvIGNvdmlkIGlmIENPVklELTE5IGlzIG1lbnRpb25lZCBhcyBhIGNhdXNlIG9uIHRoZSBkZWF0aCBjZXJ0aWZpY2F0ZSwgd2hpbGUgdGhlIGRhdGUgcmVmZXJzIHRvIHRoZSBkYXRlIHRoZSBkZWF0aCB3YXMgcmVnaXN0ZXJlZC4NCg0KVGhlIGRhdGEgaXMgYXQgVXBwZXIgVGllciBMb2NhbCBBdXRob3JpdHkgbGV2ZWwsIG9mIHdoaWNoIDE0OSBhcmUgaW4gRW5nbGFuZC4NCg0KYGBge3IgT3RoZXItRGF0YXNldHN9DQoNCm1pZF95ZWFyX3BvcHVsYXRpb25fMjAyMCA8LSByZWFkX2V4Y2VsKCJkYXRhL3VrcG9wZXN0aW1hdGVzbWlkMjAyMG9uMjAyMGdlb2dyYXBoeS54bHN4IiwNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNoZWV0ID0gIk1ZRTQiLA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc2tpcCA9IDcpICU+JQ0KICBzZWxlY3QoImFyZWFDb2RlIiA9IENvZGUsICJhcmVhTmFtZSIgPSBOYW1lLCBHZW9ncmFwaHksICJwb3B1bGF0aW9uTWlkMjAyMCIgPSBgTWlkLTIwMjBgKSAlPiUNCiAgZmlsdGVyKHN0cl9kZXRlY3QoYXJlYUNvZGUsICJeRSIpKSAlPiUgDQogIGZpbHRlcihHZW9ncmFwaHkgJWluJSBjKCJVbml0YXJ5IEF1dGhvcml0eSIsICJNZXRyb3BvbGl0YW4gRGlzdHJpY3QiLCAiQ291bnR5IiwgIkxvbmRvbiBCb3JvdWdoIikpDQoNCnV0bGFfcnVyYWxfY2xhc3NpZmljYXRpb24gPC0gcmVhZF9leGNlbCgiZGF0YS91dGxhX3J1Yy54bHN4IiwNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNraXAgPSAyKSAlPiUNCiAgcmVuYW1lKCJhcmVhQ29kZSIgPSBgVVRMQTE5IENEYCwNCiAgICAgICAgICJhcmVhTmFtZSIgPSBgVVRMQTE5IE5NYCwNCiAgICAgICAgICJkZXRhaWxlZFJ1cmFsQ2xhc3NpZmljYXRpb24iID0gUlVDMTEsDQogICAgICAgICAiYnJvYWRSdXJhbENsYXNzaWZpY2F0aW9uIiA9IGBCcm9hZCBSVUMxMWApDQoNCnV0bGFfZGF0YSA8LSBtaWRfeWVhcl9wb3B1bGF0aW9uXzIwMjAgJT4lDQogIGxlZnRfam9pbih1dGxhX3J1cmFsX2NsYXNzaWZpY2F0aW9uKSAlPiUNCiAgcmVwbGFjZV9uYShsaXN0KGRldGFpbGVkUnVyYWxDbGFzc2lmaWNhdGlvbiA9ICJVcmJhbiB3aXRoIFNpZ25pZmljYW50IFJ1cmFsIiwNCiAgICAgICAgICAgICAgICAgIGJyb2FkUnVyYWxDbGFzc2lmaWNhdGlvbiA9ICJVcmJhbiB3aXRoIFNpZ25pZmljYW50IFJ1cmFsIikpICU+JQ0KICBtdXRhdGUoYXJlYU5hbWUgPSBzdHJfcmVwbGFjZShhcmVhTmFtZSwgIkNpdHkgb2YgTG9uZG9uIiwgIkhhY2tuZXkgYW5kIENpdHkgb2YgTG9uZG9uIikgJT4lDQogICAgICAgICAgIHN0cl9yZXBsYWNlKC4sICJIYWNrbmV5JCIsICJIYWNrbmV5IGFuZCBDaXR5IG9mIExvbmRvbiIpICU+JQ0KICAgICAgICAgICBzdHJfcmVwbGFjZSguLCAiSXNsZXMgb2YgU2NpbGx5IiwgIkNvcm53YWxsIGFuZCBJc2xlcyBvZiBTY2lsbHkiKSAlPiUNCiAgICAgICAgICAgc3RyX3JlcGxhY2UoLiwgIkNvcm53YWxsJCIsICJDb3Jud2FsbCBhbmQgSXNsZXMgb2YgU2NpbGx5IiksDQogICAgICAgICBhcmVhQ29kZSA9IHN0cl9yZXBsYWNlKGFyZWFDb2RlLCAiRTA5MDAwMDAxIiwgIkUwOTAwMDAxMiIpLA0KICAgICAgICAgYXJlYUNvZGUgPSBzdHJfcmVwbGFjZShhcmVhQ29kZSwgIkUwNjAwMDA1MyIsICJFMDYwMDAwNTIiKSwNCiAgICAgICAgIGFyZWFDb2RlID0gc3RyX3JlcGxhY2UoYXJlYUNvZGUsICJFMDYwMDAwNjAiLCAiRTEwMDAwMDAyIikpICU+JQ0KICBncm91cF9ieShhcmVhQ29kZSwgYXJlYU5hbWUsIEdlb2dyYXBoeSwgZGV0YWlsZWRSdXJhbENsYXNzaWZpY2F0aW9uLCBicm9hZFJ1cmFsQ2xhc3NpZmljYXRpb24pICU+JQ0KICBzdW1tYXJpc2UocG9wdWxhdGlvbk1pZDIwMjAgPSBzdW0ocG9wdWxhdGlvbk1pZDIwMjApKSAlPiUNCiAgdW5ncm91cCgpDQogIA0KYGBgDQoNCkluIG9yZGVyIHRvIGNvbXBhcmUgdGhlIGRhdGEgYmV0d2VlbiBsb2NhbCBhdXRob3JpdGllcywgd2UgbXVzdCBub3JtYWxpc2UgdGhlIGRhdGEgZm9yIHBvcHVsYXRpb24gbGV2ZWwsIGFzIGEgbG9jYWwgYXV0aG9yaXR5IHdpdGggYSBoaWdoZXIgcG9wdWxhdGlvbiB3b3VsZCBuYXR1cmFsbHkgYWNjdW11bGF0ZSBtb3JlIGNvdmlkIGNhc2VzIGFuZCBkZWF0aHMsIGNldGVydXMtcGFyaWJ1cy4NCg0KSSBoYXZlIGltcG9ydGVkIHRoZSBydXJhbCB1cmJhbiBjbGFzc2lmaWNhdGlvbiBmb3IgdXBwZXIgdGllciBsb2NhbCBhdXRob3JpdGllcywgd2hpY2ggaXMgY29uc3RydWN0ZWQgdXNpbmcgdGhlIHNhbWUgbWV0aG9kIGFzIHRoZSBsb2NhbCBhdXRob3JpdHkgZGlzdHJpY3QgcnVyYWwgdXJiYW4gY2xhc3NpZmljYXRpb24uIEFyZWFzIHdpdGggYSBydXJhbCBwb3B1bGF0aW9uIG92ZXIgNTAlIGFyZSBjbGFzc2lmaWVkIGFzIHByZWRvbWluYW50bHkgcnVyYWwsIGFuZCBhcmVhcyB3aXRoIGEgcnVyYWwgcG9wdWxhdGlvbiBiZWxvdyAyNSUgYXJlIGNsYXNzaWZpZWQgYXMgcHJlZG9taW5hbnRseSB1cmJhbi4NCg0KYGBge3J9DQoNCmRldGFpbGVkX3J1Y19vcmRlciA8LSBjKCJNYWlubHkgUnVyYWwiLCAiTGFyZ2VseSBSdXJhbCIsICJVcmJhbiB3aXRoIFNpZ25pZmljYW50IFJ1cmFsIiwgIlVyYmFuIHdpdGggQ2l0eSBhbmQgVG93biIsICJVcmJhbiB3aXRoIE1pbm9yIENvbnVyYmF0aW9uIiwgIlVyYmFuIHdpdGggTWFqb3IgQ29udXJiYXRpb24iKQ0KDQpFbmdfZGFpbHlfY292aWQxOV9pbmRpY2F0b3JzICU+JQ0KICBsZWZ0X2pvaW4odXRsYV9kYXRhKSAlPiUNCiAgZ3JvdXBfYnkoZGV0YWlsZWRSdXJhbENsYXNzaWZpY2F0aW9uKSAlPiUNCiAgc3VtbWFyaXNlKFRvdGFsQ2FzZXMgPSBzdW0obmV3Q2FzZXNCeVB1Ymxpc2hEYXRlKSwNCiAgICAgICAgICAgIFRvdGFsRGVhdGhzID0gc3VtKG5ld09uc0RlYXRoc0J5UmVnaXN0cmF0aW9uRGF0ZSksDQogICAgICAgICAgICBuTEFEID0gbl9kaXN0aW5jdChhcmVhQ29kZSkpICU+JQ0KICBtdXRhdGUoZGV0YWlsZWRSdXJhbENsYXNzaWZpY2F0aW9uID0gZmFjdG9yKGRldGFpbGVkUnVyYWxDbGFzc2lmaWNhdGlvbiwgZGV0YWlsZWRfcnVjX29yZGVyKSkgJT4lDQogIGFycmFuZ2UoZGV0YWlsZWRSdXJhbENsYXNzaWZpY2F0aW9uKSAlPiUNCiAgbGVmdF9qb2luKHV0bGFfZGF0YSAlPiUgDQogICAgICAgICAgICAgIGdyb3VwX2J5KGRldGFpbGVkUnVyYWxDbGFzc2lmaWNhdGlvbikgJT4lDQogICAgICAgICAgICAgIHN1bW1hcmlzZShwb3AyMDIwID0gc3VtKHBvcHVsYXRpb25NaWQyMDIwKSwNCiAgICAgICAgICAgICAgICAgICAgICAgIG5MQURjaGVjayA9IG5fZGlzdGluY3QoYXJlYUNvZGUpKSkgJT4lDQogIG11dGF0ZSgpDQogIA0KDQpgYGANCg0K</div>
 
 
 

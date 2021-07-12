@@ -1,0 +1,53 @@
+---
+title: "Does rurality have an impact of Coronavirus?"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+
+```
+
+Import daily covid cases and deaths for the UK from the Public Health England coronavirus data api.
+
+```{r}
+
+uk_daily_covid19_cases <- read_csv("https://api.coronavirus.data.gov.uk/v2/data?areaType=utla&metric=newCasesByPublishDate&format=csv")
+
+uk_daily_covid19_deaths <- read_csv("https://api.coronavirus.data.gov.uk/v2/data?areaType=utla&metric=newOnsDeathsByRegistrationDate&format=csv")
+
+```
+
+```{r}
+glimpse(uk_daily_covid19_cases)
+
+glimpse(uk_daily_covid19_deaths)
+
+```
+
+### Daily Cases
+
+Data has `r nrow(uk_daily_covid19_cases)` rows and `r ncol(uk_daily_covid19_cases)` columns.
+
+Dates: `r min(uk_daily_covid19_cases$date)` to `r max(uk_daily_covid19_cases$date)`.
+
+It assigns covid cases by the date the data was published on, not when the initial test was taken.
+
+The data is at Upper Tier Local Authority level.
+
+### Daily Deaths
+
+Data has `r nrow(uk_daily_covid19_deaths)` rows and `r ncol(uk_daily_covid19_deaths)` columns.
+
+Dates: `r min(uk_daily_covid19_deaths$date)` to `r max(uk_daily_covid19_deaths$date)`.
+
+It assigns deaths to covid if COVID-19 is mentioned as a cause on the death certificate, while the date refers to the date the death was registered.
+
+The data is at Upper Tier Local Authority level.
+
+```{r}
+
+
+
+```
+

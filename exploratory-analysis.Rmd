@@ -140,6 +140,8 @@ The covid rate of the most urban areas is `r round(overall_data$OverallCaseRate[
 
 However, the overall death rate had less clear pattern. The most rural areas had the a rate of `r round(overall_data$OverallDeathRate[1],0)` deaths registered per 100,000 population, while the overall death rate for the most urban areas had the 3rd highest death rate of `r round(overall_data$OverallDeathRate[6],0)` deaths registered per 100,000 population. The highest death rate came from Urban areas with Minor Conurbations with a death rate of `r round(overall_data$OverallDeathRate[5],0)` deaths registered per 100,000 population.
 
+The covid death rate of the most urban areas is `r round(overall_data$OverallDeathRate[6]/overall_data$OverallDeathRate[1],1)` times the covid death rate in the most rural areas.
+
 ```{r mapping}
 
 UTLA_shp <- st_read("spatial data/COunties_and_Unitary_Authorities_(December_2019)_Boundaries_UK_BFC.shp") %>%

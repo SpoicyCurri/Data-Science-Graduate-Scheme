@@ -1,6 +1,8 @@
 ---
 title: "Does rurality have an impact on the spread of Coronavirus?"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r}
